@@ -1,0 +1,10 @@
+/public/bundles/
+/var/
+/vendor/
+
+/node_modules/
+/public/build/
+
+.DS_Store
+Dockerfile
+.env.local
