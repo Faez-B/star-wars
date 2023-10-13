@@ -31,6 +31,17 @@ services:
       - mynetwork
     environment:
       PMA_HOST: database
+  
+  ### L'application ###
+  swgoh :
+    container_name: app
+    build: .
+    ports:
+      - 80:80
+    depends_on:
+      - database
+    networks:
+      - mynetwork
 
 volumes:
 ###> doctrine/doctrine-bundle ###
