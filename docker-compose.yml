@@ -1,4 +1,4 @@
-version: '3'
+version: '3.8'
 
 services:
   ### Base de données ###
@@ -6,6 +6,7 @@ services:
     container_name: database
     image: mysql:latest
     restart: always
+    ports: [3306]
     environment:
       MYSQL_ROOT_PASSWORD: 6vGsX7E3Arsd
       MYSQL_ALLOW_EMPTY_PASSWORD: no
