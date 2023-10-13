@@ -1,11 +1,40 @@
 version: '3'
 
-# services:
-###> doctrine/doctrine-bundle ###
+services:
+  ### Base de données ###
+  database:
+    container_name: database
+    image: mysql:latest
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: 6vGsX7E3Arsd
+      MYSQL_ALLOW_EMPTY_PASSWORD: no
+      MYSQL_USER: user
+      MYSQL_PASSWORD: nMtMMQDej2bX
+      MYSQL_DATABASE: swgoh
+    volumes:
+      - database_data:/var/lib/mysql
+    networks:
+      - mynetwork
 
-###< doctrine/doctrine-bundle ###
+  ### Interface BDD ###
+  phpmyadmin:
+    container_name: phpmyadmin
+    image: phpmyadmin:latest
+    restart: always
+    ports:
+      - '8080:80'
+    depends_on:
+      - database
+    networks:
+      - mynetwork
+    environment:
+      PMA_HOST: database
 
 volumes:
 ###> doctrine/doctrine-bundle ###
   database_data:
 ###< doctrine/doctrine-bundle ###
+
+networks:
+  mynetwork:
