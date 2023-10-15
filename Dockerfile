@@ -14,9 +14,10 @@ RUN npm run build
 # 3 - Exécuter l'application
 FROM php:8.2.4-apache
 WORKDIR /var/www
-COPY --from=composer /app/vendor /var/www/vendor
-COPY --from=node /app/node_modules /app/node_modules
-COPY . /var/www
+# COPY --from=composer /app/vendor /var/www/vendor
+# COPY --from=node /app/node_modules /app/node_modules
+COPY --from=node /app ./
+# COPY . /var/www
 
 ## Installation des extensions PHP
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
