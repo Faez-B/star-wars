@@ -14,7 +14,7 @@ services:
       MYSQL_PASSWORD: nMtMMQDej2bX
       MYSQL_DATABASE: swgoh
     volumes:
-      - database_data:/var/lib/mysql
+      - ./volume_database_data:/var/lib/mysql
     networks:
       - mynetwork
 
@@ -42,6 +42,8 @@ services:
       - database
     networks:
       - mynetwork
+    volumes:
+      - ./:/var/www
 
 volumes:
 ###> doctrine/doctrine-bundle ###
