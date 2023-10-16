@@ -34,6 +34,9 @@ class Joueur
     #[ORM\Column]
     private ?int $puisGalactiqueVaisseaux = null;
 
+    #[ORM\ManyToOne(inversedBy: 'joueurs')]
+    private ?Guilde $guilde = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -119,6 +122,18 @@ class Joueur
     public function setPuisGalactiqueVaisseaux(int $puisGalactiqueVaisseaux): static
     {
         $this->puisGalactiqueVaisseaux = $puisGalactiqueVaisseaux;
+
+        return $this;
+    }
+
+    public function getGuilde(): ?Guilde
+    {
+        return $this->guilde;
+    }
+
+    public function setGuilde(?Guilde $guilde): static
+    {
+        $this->guilde = $guilde;
 
         return $this;
     }
