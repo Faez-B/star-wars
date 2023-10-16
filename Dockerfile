@@ -2,7 +2,7 @@
 FROM composer:latest as composer
 WORKDIR /app
 COPY . ./
-RUN composer install
+RUN composer install --no-scripts --optimize-autoloader
 
 # 2 - Utiliser l'image Node pour installer les dépendances JS
 FROM node:latest as node
@@ -19,7 +19,7 @@ COPY --from=node /app ./
 ## Installation des extensions PHP
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 RUN chmod +x /usr/local/bin/install-php-extensions && \
-    install-php-extensions gd xdebug pdo pdo_mysql intl zip
+    install-php-extensions gd xdebug pdo pdo_mysql opcache
 
 ## Création du dossier /var
 RUN php bin/console cache:clear
