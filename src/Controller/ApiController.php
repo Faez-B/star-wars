@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Guilde;
 use App\Entity\Joueur;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpClient\HttpClient;
@@ -41,6 +42,13 @@ class ApiController extends AbstractController
     #[Route('/{allyCode}/create', name: 'create_player')]
     public function createPlayer(int $allyCode): Response
     {
+        // ----- LE JOUEUR -----
+
+        // Vérifier si le joueur existe déjà
+        $joueur = $this->em->getRepository(Joueur::class)->findOneBy(['allyCode' => $allyCode]);
+        if ($joueur) return new Response('Le joueur existe déjà', Response::HTTP_OK);
+        // Si le joueur existe, on n'exécute pas le code d'après
+
         $client = HttpClient::create();
         $response = $client->request('GET', 'https://swgoh.gg/api/player/' . $allyCode);
         $data = ($response->toArray())['data'];
@@ -55,8 +63,33 @@ class ApiController extends AbstractController
         $joueur->setPuisGalactiqueVaisseaux($data['ship_galactic_power']);
         
         $this->em->persist($joueur);
+
+
+        // ----- LA GUILDE -----
+
+        // $récupérer l'id de la guilde grâce à l'allyCode du joueur
+        $guildID = $data["guild_id"];
+
+        // Vérifier si la guilde existe déjà
+        $guilde = $this->em->getRepository(Guilde::class)->findOneBy(['uniqId' => $guildID]);
+        if ($guilde) return new Response('La guilde existe déjà', Response::HTTP_OK);
+        // Si la guilde existe, on n'exécute pas le code d'après
+
+        $response = $client->request('GET', 'https://swgoh.gg/api/guild-profile/' . $guildID);
+        $data = ($response->toArray())['data'];
+
+        $guilde = new Guilde();
+        $guilde->setUniqId($data['guild_id']);
+        $guilde->setNom($data['name']);
+        $guilde->setPuisGalactique($data['galactic_power']);
+        $guilde->addJoueur($joueur);
+
+        $this->em->persist($guilde);
+
+        // ----- LES JOUEURS de la guilde -----
+
         $this->em->flush();
 
-        return new Response('Joueur créé', Response::HTTP_OK);
+        return new Response('Le joueur, sa guilde et les joueurs de la guilde sont créés', Response::HTTP_OK);
     }
 }
