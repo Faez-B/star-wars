@@ -15,10 +15,22 @@ class ApiController extends AbstractController
     public function getGuildInfos(int $allyCode): JsonResponse
     {
         $client = HttpClient::create();
-        $response = $client->request('GET', 'https://swgoh.gg/api/player/'.$allyCode.'/');
-
+        $response = $client->request('GET', 'https://swgoh.gg/api/player/' . $allyCode);
         $data = $response->toArray();
 
-        return $this->json($data);
+        // $récupérer l'id de la guilde grâce à l'allyCode du joueur
+        $guildID = $data["data"]["guild_id"];
+
+        $response = $client->request('GET', 'https://swgoh.gg/api/guild-profile/' . $guildID);
+        $data = ($response->toArray())['data'];
+
+        // return $this->json($data);
+
+        return $this->json([
+            'id' => $data['guild_id'],
+            'nom' => $data['name'],
+            'puisGalactique' => $data['galactic_power'],
+            'nbJoueurs' => count($data["members"]),
+        ]);
     }
 }
