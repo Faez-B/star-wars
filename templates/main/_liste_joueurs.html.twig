@@ -1,0 +1,15 @@
+{% for joueur in joueurs %}
+    <tr>
+        <td>{{ joueur.allyCode }}</td>
+        <td>{{ joueur.pseudo }}</td>
+        <td>{{ joueur.titre }}</td>
+        <td>{{ joueur.niveau }}</td>
+        <td>{{ joueur.puisGalactiqueTotale }}</td>
+        <td>{{ joueur.puisGalactiqueHeros }}</td>
+        <td>{{ joueur.puisGalactiqueVaisseaux }}</td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="7">Aucun joueur trouvé</td>
+    </tr>
+{% endfor %}
