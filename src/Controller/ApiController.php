@@ -63,6 +63,7 @@ class ApiController extends AbstractController
         $joueur->setPuisGalactiqueVaisseaux($data['ship_galactic_power']);
         
         $this->em->persist($joueur);
+        $this->em->flush();
 
 
         // ----- LA GUILDE -----
@@ -86,7 +87,32 @@ class ApiController extends AbstractController
 
         $this->em->persist($guilde);
 
+
         // ----- LES JOUEURS de la guilde -----
+        foreach ($data["members"] as $member) {
+            $allyCode = $member["ally_code"];
+
+            // Vérifier si le joueur existe déjà
+            $joueur = $this->em->getRepository(Joueur::class)->findOneBy(['allyCode' => $allyCode]);
+
+            if ( !$joueur ) {
+                $response = $client->request('GET', 'https://swgoh.gg/api/player/' . $allyCode);
+                $data = ($response->toArray())['data'];
+    
+                $joueur = new Joueur();
+                $joueur->setAllyCode($allyCode);
+                $joueur->setPseudo($data['name']);
+                $joueur->setTitre($data['title']);
+                $joueur->setNiveau($data['level']);
+                $joueur->setPuisGalactiqueTotale($data['galactic_power']);
+                $joueur->setPuisGalactiqueHeros($data['character_galactic_power']);
+                $joueur->setPuisGalactiqueVaisseaux($data['ship_galactic_power']);
+                
+                $guilde->addJoueur($joueur);
+                $this->em->persist($joueur);
+                $this->em->persist($guilde);
+            }
+        }
 
         $this->em->flush();
 
