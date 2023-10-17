@@ -49,6 +49,9 @@ class Heros
     #[ORM\Column]
     private ?int $volVie = null;
 
+    #[ORM\ManyToOne(inversedBy: 'heros')]
+    private ?Joueur $joueur = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -194,6 +197,18 @@ class Heros
     public function setVolVie(int $volVie): static
     {
         $this->volVie = $volVie;
+
+        return $this;
+    }
+
+    public function getJoueur(): ?Joueur
+    {
+        return $this->joueur;
+    }
+
+    public function setJoueur(?Joueur $joueur): static
+    {
+        $this->joueur = $joueur;
 
         return $this;
     }

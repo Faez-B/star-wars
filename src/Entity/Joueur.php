@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\JoueurRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: JoueurRepository::class)]
@@ -36,6 +38,14 @@ class Joueur
 
     #[ORM\ManyToOne(inversedBy: 'joueurs')]
     private ?Guilde $guilde = null;
+
+    #[ORM\OneToMany(mappedBy: 'joueur', targetEntity: Heros::class)]
+    private Collection $heros;
+
+    public function __construct()
+    {
+        $this->heros = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -134,6 +144,36 @@ class Joueur
     public function setGuilde(?Guilde $guilde): static
     {
         $this->guilde = $guilde;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Heros>
+     */
+    public function getHeros(): Collection
+    {
+        return $this->heros;
+    }
+
+    public function addHero(Heros $hero): static
+    {
+        if (!$this->heros->contains($hero)) {
+            $this->heros->add($hero);
+            $hero->setJoueur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHero(Heros $hero): static
+    {
+        if ($this->heros->removeElement($hero)) {
+            // set the owning side to null (unless already changed)
+            if ($hero->getJoueur() === $this) {
+                $hero->setJoueur(null);
+            }
+        }
 
         return $this;
     }
