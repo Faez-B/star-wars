@@ -19,7 +19,8 @@ COPY --from=node /app ./
 ## Installation des extensions PHP
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 RUN chmod +x /usr/local/bin/install-php-extensions && \
-    install-php-extensions gd xdebug pdo pdo_mysql opcache
+    install-php-extensions pdo pdo_mysql
+    # gd xdebug opcache
 
 ## Création du dossier /var
 RUN php bin/console cache:clear
