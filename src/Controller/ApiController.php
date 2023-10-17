@@ -130,6 +130,7 @@ class ApiController extends AbstractController
         $joueurs = $this->em->getRepository(Joueur::class)->findAll();
 
         foreach ($joueurs as $joueur) {
+            dump($joueur->getPseudo());
             
             // Vérifier chaque héros pour chaque joueur
             foreach ($data as $character) {
@@ -145,10 +146,52 @@ class ApiController extends AbstractController
                     
                     $content = $response->getContent();
                     $crawler = new Crawler($content);
-                    
-                    $puissance = $crawler->filter('span.pc-stat-value')->text();
 
-                    echo "Joueur: " . $joueur->getPseudo() . " - Character: " . $characterSlug . " - Puissance: " . $puissance . "\n";
+                    $nom = $crawler->filter('a.pc-char-overview-name')->text();
+                    $vie = trim($crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Health")]/following-sibling::span/text()')->text());
+                    $puissance = $crawler->filter('.media-body span.pc-stat-value')->text();
+                    $vitesse = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Speed")]/following-sibling::span/text()')->text();
+                    $protection = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Protection")]/following-sibling::span/text()')->text();
+                    $tenacite = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Tenacity")]/following-sibling::span/text()')->text();
+                    $degatsPhys = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Physical Damage")]/following-sibling::span/text()')->text();
+                    $degatsSpe = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Special Damage")]/following-sibling::span/text()')->text();
+                    $chanceCCPhys = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Physical Critical Chance")]/following-sibling::span/text()')->text();
+                    $chanceCCSpe = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Special Critical Chance")]/following-sibling::span/text()')->text();
+                    $degatsCrit = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Critical Damage")]/following-sibling::span/text()')->text();
+                    $volVie = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Health Steal")]/following-sibling::span/text()')->text();
+
+                    // Supprime le % de la chaîne
+                    $tenacite = str_replace('%', '', $tenacite);
+                    $chanceCCPhys = str_replace('%', '', $chanceCCPhys);
+                    $chanceCCSpe = str_replace('%', '', $chanceCCSpe);
+                    $degatsCrit = str_replace('%', '', $degatsCrit);
+                    $volVie = str_replace('%', '', $volVie);
+
+                    // Transforme la chaîne en float
+                    $vie = str_replace(',', '.', $vie);                     $vie = floatval($vie);
+                    $protection = str_replace(',', '.', $protection);       $protection = floatval($protection);
+                    $degatsPhys = str_replace(',', '.', $degatsPhys);       $degatsPhys = floatval($degatsPhys);
+                    $degatsSpe = str_replace(',', '.', $degatsSpe);         $degatsSpe = floatval($degatsSpe);
+                    $tenacite = str_replace(',', '.', $tenacite);           $tenacite = floatval($tenacite);
+                    $chanceCCPhys = str_replace(',', '.', $chanceCCPhys);   $chanceCCPhys = floatval($chanceCCPhys);
+                    $chanceCCSpe = str_replace(',', '.', $chanceCCSpe);     $chanceCCSpe = floatval($chanceCCSpe);
+                    $degatsCrit = str_replace(',', '.', $degatsCrit);       $degatsCrit = floatval($degatsCrit);
+                    $volVie = str_replace(',', '.', $volVie);               $volVie = floatval($volVie);
+                    
+                    dump([
+                        'nom' => $nom,
+                        'puissance' => intval($puissance),
+                        'vitesse' => intval($vitesse),
+                        'vie' => $vie,
+                        'protection' => $protection,
+                        'degatsPhys' => $degatsPhys,
+                        'degatsSpe' => $degatsSpe,
+                        'tenacite' => $tenacite,
+                        'chanceCCPhys' => $chanceCCPhys,
+                        'chanceCCSpe' => $chanceCCSpe,
+                        'degatsCrit' => $degatsCrit,
+                        'volVie' => $volVie,
+                    ]);
                 }
             }
 
