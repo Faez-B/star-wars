@@ -8,8 +8,8 @@ RUN composer install --no-scripts --optimize-autoloader
 FROM node:latest as node
 WORKDIR /app
 COPY --from=composer /app ./
-RUN npm install
-RUN npm run build
+RUN npm install \
+    && npm run build
 
 # 3 - Exécuter l'application
 FROM php:8.2.4-apache

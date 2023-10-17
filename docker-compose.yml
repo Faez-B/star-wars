@@ -14,7 +14,7 @@ services:
       MYSQL_PASSWORD: nMtMMQDej2bX
       MYSQL_DATABASE: swgoh
     volumes:
-      - database_data:/var/lib/mysql
+      - ./volume_database_data:/var/lib/mysql
     networks:
       - mynetwork
 
@@ -42,6 +42,10 @@ services:
       - database
     networks:
       - mynetwork
+    # Utile pour le dev (modifications envoyées dans le container) 
+    # mais il faut également exécuter les commandes d'instalation (composer install, npm install, npm run build)
+    volumes:
+      - ./:/var/www
 
 volumes:
 ###> doctrine/doctrine-bundle ###
