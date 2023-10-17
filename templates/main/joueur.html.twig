@@ -1,0 +1,48 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du joueur{% endblock %}
+
+{% block body %}
+<div class="">
+    <h1 class="text-center">Détails du joueur</h1>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>Code allié</th>
+                <td>{{ joueur.allyCode }}</td>
+            </tr>
+            <tr>
+                <th>Pseudo</th>
+                <td>{{ joueur.pseudo }}</td>
+            </tr>
+            <tr>
+                <th>Titre</th>
+                <td>{{ joueur.titre }}</td>
+            </tr>
+            <tr>
+                <th>Niveau</th>
+                <td>{{ joueur.niveau }}</td>
+            </tr>
+            <tr>
+                <th>Puissance galactique totale</th>
+                <td>{{ joueur.puisGalactiqueTotale }}</td>
+            </tr>
+            <tr>
+                <th>Puissance galactique héros</th>
+                <td>{{ joueur.puisGalactiqueHeros }}</td>
+            </tr>
+            <tr>
+                <th>Puissance galactique vaisseaux</th>
+                <td>{{ joueur.puisGalactiqueVaisseaux }}</td>
+            </tr>
+            <tr>
+                <th>Lien vers SWGOH.gg</th>
+                <td>
+                    <a href="{{'https://swgoh.gg/p/' ~ joueur.allyCode}}" target="_blank" rel="noopener noreferrer">Aller sur la page du joueur</a>
+                </td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

@@ -23,4 +23,12 @@ class MainController extends AbstractController
             'joueurs' => $joueurs,
         ]);
     }
+
+    #[Route('/joueur/{id}', name: 'see_player')]
+    public function seePlayer(Joueur $joueur): Response
+    {
+        return $this->render('main/joueur.html.twig', [
+            'joueur' => $joueur,
+        ]);
+    }
 }
