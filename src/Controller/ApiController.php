@@ -5,6 +5,7 @@ namespace App\Controller;
 use App\Entity\Guilde;
 use App\Entity\Joueur;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
@@ -117,5 +118,43 @@ class ApiController extends AbstractController
         $this->em->flush();
 
         return new Response('Le joueur, sa guilde et les joueurs de la guilde sont créés', Response::HTTP_OK);
+    }
+
+    #[Route('/createHeros', name: 'create_heros', methods: ['GET'])]
+    public function createHeros(): JsonResponse
+    {
+        $client = HttpClient::create();
+        $response = $client->request('GET', 'https://swgoh.gg/api/characters/');
+        $data = $response->toArray();
+
+        $joueurs = $this->em->getRepository(Joueur::class)->findAll();
+
+        foreach ($joueurs as $joueur) {
+            
+            // Vérifier chaque héros pour chaque joueur
+            foreach ($data as $character) {
+                $path = parse_url($character['url'], PHP_URL_PATH);
+                $characterSlug = basename($path);
+                
+                $characterURL = "https://swgoh.gg/p/" . $joueur->getAllyCode() . "/characters/" . $characterSlug;
+
+                $response = $client->request('GET', $characterURL);
+                
+                // On vérifie si le héros est dans la collection du joueur => (status code == 200)
+                if ($response->getStatusCode() === 200) {
+                    
+                    $content = $response->getContent();
+                    $crawler = new Crawler($content);
+                    
+                    $puissance = $crawler->filter('span.pc-stat-value')->text();
+
+                    echo "Joueur: " . $joueur->getPseudo() . " - Character: " . $characterSlug . " - Puissance: " . $puissance . "\n";
+                }
+            }
+
+            exit;
+        }
+            
+        return $this->json($data);
     }
 }
