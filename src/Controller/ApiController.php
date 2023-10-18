@@ -2,8 +2,10 @@
 
 namespace App\Controller;
 
+use App\Entity\Heros;
 use App\Entity\Guilde;
 use App\Entity\Joueur;
+use App\Service\HerosService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpClient\HttpClient;
@@ -121,7 +123,7 @@ class ApiController extends AbstractController
     }
 
     #[Route('/createHeros', name: 'create_heros', methods: ['GET'])]
-    public function createHeros(): JsonResponse
+    public function createHeros(HerosService $herosService): Response
     {
         $client = HttpClient::create();
         $response = $client->request('GET', 'https://swgoh.gg/api/characters/');
@@ -130,9 +132,8 @@ class ApiController extends AbstractController
         $joueurs = $this->em->getRepository(Joueur::class)->findAll();
 
         foreach ($joueurs as $joueur) {
-            dump($joueur->getPseudo());
             
-            // Vérifier chaque héros pour chaque joueur
+            // Vérifier chaque héros (API) pour chaque joueur (BDD)
             foreach ($data as $character) {
                 $path = parse_url($character['url'], PHP_URL_PATH);
                 $characterSlug = basename($path);
@@ -147,57 +148,63 @@ class ApiController extends AbstractController
                     $content = $response->getContent();
                     $crawler = new Crawler($content);
 
-                    $nom = $crawler->filter('a.pc-char-overview-name')->text();
-                    $vie = trim($crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Health")]/following-sibling::span/text()')->text());
-                    $puissance = $crawler->filter('.media-body span.pc-stat-value')->text();
-                    $vitesse = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Speed")]/following-sibling::span/text()')->text();
-                    $protection = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Protection")]/following-sibling::span/text()')->text();
-                    $tenacite = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Tenacity")]/following-sibling::span/text()')->text();
-                    $degatsPhys = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Physical Damage")]/following-sibling::span/text()')->text();
-                    $degatsSpe = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Special Damage")]/following-sibling::span/text()')->text();
-                    $chanceCCPhys = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Physical Critical Chance")]/following-sibling::span/text()')->text();
-                    $chanceCCSpe = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Special Critical Chance")]/following-sibling::span/text()')->text();
-                    $degatsCrit = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Critical Damage")]/following-sibling::span/text()')->text();
-                    $volVie = $crawler->filter('.media-body')->filterXPath('//span[contains(text(), "Health Steal")]/following-sibling::span/text()')->text();
+                    $nom            = $crawler->filter('a.pc-char-overview-name')->text();
+                    $vie            = trim($herosService->getText($crawler, 'Health'));
+                    $puissance      = $crawler->filter('.media-body span.pc-stat-value')->text();
+                    $vitesse        = $herosService->getText($crawler, 'Speed');
+                    $protection     = $herosService->getText($crawler, 'Protection');
+                    $tenacite       = $herosService->getText($crawler, 'Tenacity');
+                    $degatsPhys     = $herosService->getText($crawler, 'Physical Damage');
+                    $degatsSpe      = $herosService->getText($crawler, 'Special Damage');
+                    $chanceCCPhys   = $herosService->getText($crawler, 'Physical Critical Chance');
+                    $chanceCCSpe    = $herosService->getText($crawler, 'Special Critical Chance');
+                    $degatsCrit     = $herosService->getText($crawler, 'Critical Damage');
+                    $volVie         = $herosService->getText($crawler, 'Health Steal');
 
                     // Supprime le % de la chaîne
-                    $tenacite = str_replace('%', '', $tenacite);
-                    $chanceCCPhys = str_replace('%', '', $chanceCCPhys);
-                    $chanceCCSpe = str_replace('%', '', $chanceCCSpe);
-                    $degatsCrit = str_replace('%', '', $degatsCrit);
-                    $volVie = str_replace('%', '', $volVie);
+                    $tenacite       = $herosService->removePercentageInStat($tenacite);
+                    $chanceCCPhys   = $herosService->removePercentageInStat($chanceCCPhys);
+                    $chanceCCSpe    = $herosService->removePercentageInStat($chanceCCSpe);
+                    $degatsCrit     = $herosService->removePercentageInStat($degatsCrit);
+                    $volVie         = $herosService->removePercentageInStat($volVie);
 
                     // Transforme la chaîne en float
-                    $vie = str_replace(',', '.', $vie);                     $vie = floatval($vie);
-                    $protection = str_replace(',', '.', $protection);       $protection = floatval($protection);
-                    $degatsPhys = str_replace(',', '.', $degatsPhys);       $degatsPhys = floatval($degatsPhys);
-                    $degatsSpe = str_replace(',', '.', $degatsSpe);         $degatsSpe = floatval($degatsSpe);
-                    $tenacite = str_replace(',', '.', $tenacite);           $tenacite = floatval($tenacite);
-                    $chanceCCPhys = str_replace(',', '.', $chanceCCPhys);   $chanceCCPhys = floatval($chanceCCPhys);
-                    $chanceCCSpe = str_replace(',', '.', $chanceCCSpe);     $chanceCCSpe = floatval($chanceCCSpe);
-                    $degatsCrit = str_replace(',', '.', $degatsCrit);       $degatsCrit = floatval($degatsCrit);
-                    $volVie = str_replace(',', '.', $volVie);               $volVie = floatval($volVie);
-                    
-                    dump([
-                        'nom' => $nom,
-                        'puissance' => intval($puissance),
-                        'vitesse' => intval($vitesse),
-                        'vie' => $vie,
-                        'protection' => $protection,
-                        'degatsPhys' => $degatsPhys,
-                        'degatsSpe' => $degatsSpe,
-                        'tenacite' => $tenacite,
-                        'chanceCCPhys' => $chanceCCPhys,
-                        'chanceCCSpe' => $chanceCCSpe,
-                        'degatsCrit' => $degatsCrit,
-                        'volVie' => $volVie,
-                    ]);
+                    $vie            = $herosService->convertStringToFloat($vie);
+                    $protection     = $herosService->convertStringToFloat($protection);
+                    $degatsPhys     = $herosService->convertStringToFloat($degatsPhys);
+                    $degatsSpe      = $herosService->convertStringToFloat($degatsSpe);
+                    $tenacite       = $herosService->convertStringToFloat($tenacite);
+                    $chanceCCPhys   = $herosService->convertStringToFloat($chanceCCPhys);
+                    $chanceCCSpe    = $herosService->convertStringToFloat($chanceCCSpe);
+                    $degatsCrit     = $herosService->convertStringToFloat($degatsCrit);
+                    $volVie         = $herosService->convertStringToFloat($volVie);
+
+
+                    $heros = new Heros();
+                    $heros->setBaseID($character['base_id']);
+                    $heros->setNom($nom);
+                    $heros->setVie($vie);
+                    $heros->setPuissance($puissance);
+                    $heros->setVitesse($vitesse);
+                    $heros->setProtection($protection);
+                    $heros->setTenacite($tenacite);
+                    $heros->setDegatsPhysiques($degatsPhys);
+                    $heros->setDegatSpeciaux($degatsSpe);
+                    $heros->setChanceCCdegatsPhys($chanceCCPhys);
+                    $heros->setChanceCCdegatsSpe($chanceCCSpe);
+                    $heros->setDegatCritique($degatsCrit);
+                    $heros->setVolVie($volVie);
+
+                    $joueur->addHero($heros);
+
+                    $this->em->persist($heros);
+                    $this->em->persist($joueur);
                 }
             }
-
-            exit;
         }
+
+        $this->em->flush();
             
-        return $this->json($data);
+        return new Response('Les héros sont créés', Response::HTTP_OK);
     }
 }
