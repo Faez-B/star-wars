@@ -48,6 +48,12 @@
                 <td>{{ joueur.puisGalactiqueVaisseaux }}</td>
             </tr>
             <tr>
+                <th>Guilde</th>
+                <td>
+                    <a href="{{ path('see_guild', {id : joueur.guilde.id}) }}">{{ joueur.guilde.nom }}</a>
+                </td>
+            </tr>
+            <tr>
                 <th>Lien vers SWGOH.gg</th>
                 <td>
                     <a href="{{'https://swgoh.gg/p/' ~ joueur.allyCode}}" target="_blank" rel="noopener noreferrer">Aller sur la page du joueur</a>

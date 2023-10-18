@@ -102,4 +102,8 @@ class Guilde
 
         return $this;
     }
+
+    public function getNombreJoueurs() : int {
+        return count($this->joueurs);
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Guilde;
 use App\Entity\Joueur;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -35,6 +36,14 @@ class MainController extends AbstractController
         return $this->render('main/joueur.html.twig', [
             'joueur' => $joueur,
             'addShips' => $addShips,
+        ]);
+    }
+
+    #[Route('/guilde/{id}', name: 'see_guild')]
+    public function seeGuild(Guilde $guilde): Response
+    {
+        return $this->render('main/guilde.html.twig', [
+            'guilde' => $guilde,
         ]);
     }
 }
