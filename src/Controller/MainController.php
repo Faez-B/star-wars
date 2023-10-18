@@ -27,8 +27,14 @@ class MainController extends AbstractController
     #[Route('/joueur/{id}', name: 'see_player')]
     public function seePlayer(Joueur $joueur): Response
     {
+        $addShips = false;
+        if ($joueur->getVaisseaux()->count() === 0) {
+            $addShips = true;
+        }
+
         return $this->render('main/joueur.html.twig', [
             'joueur' => $joueur,
+            'addShips' => $addShips,
         ]);
     }
 }

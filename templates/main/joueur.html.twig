@@ -4,7 +4,18 @@
 
 {% block body %}
 <div class="">
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success mt-3">
+            {{ message }}
+        </div>
+    {% endfor %}
+
     <h1 class="h1 text-center">Détails du joueur</h1>
+
+    {% if addShips is defined and addShips == true %}
+        <a href="{{ path('create_ships', {'allyCode' : joueur.allyCode}) }}" class="btn btn-success">Ajouter ses vaisseaux</a>
+    {% endif %}
 
     <table class="table">
         <tbody>
@@ -92,6 +103,55 @@
                     </tr>
                 {% else %}
                     Aucun héros dans la collection
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
+    <hr>
+
+    <h2 class="h2">Ses vaisseaux :</h2>
+
+    <div class="table-responsive">
+        <table id="joueur-vaisseaux-table" class="table" 
+            data-toggle="table" 
+            data-pagination="true" 
+            data-search="true" 
+            data-page-size="15"
+            data-search-align="left"
+            data-search-highlight="true"
+        >
+            <thead>
+                <th data-searchable="false">ID</th>
+                <th data-searchable="true" data-sortable="true">Nom</th>
+                <th data-searchable="false">Vie</th>
+                <th data-searchable="false">Protection</th>
+                <th data-searchable="false" data-sortable="true">Puissance</th>
+                <th data-searchable="false">Vitesse</th>
+                <th data-searchable="false">Ténacité</th>
+                <th data-searchable="false">Dégâts physiques</th>
+                <th data-searchable="false">Dégâts spéciaux</th>
+                <th data-searchable="false">Chance coup critique dégâts physiques</th>
+                <th data-searchable="false">Chance coup critique dégâts spéciaux</th>
+            </thead>
+
+            <tbody>
+                {% for vaisseau in joueur.vaisseaux %}
+                    <tr>
+                        <td>{{ vaisseau.baseID }}</td>
+                        <td>{{ vaisseau.nom }}</td>
+                        <td>{{ vaisseau.vie }}</td>
+                        <td>{{ vaisseau.protection }}</td>
+                        <td>{{ vaisseau.puissance }}</td>
+                        <td>{{ vaisseau.vitesse }}</td>
+                        <td>{{ vaisseau.tenacite }}</td>
+                        <td>{{ vaisseau.degatsPhysiques }}</td>
+                        <td>{{ vaisseau.degatSpeciaux }}</td>
+                        <td>{{ vaisseau.chanceCCdegatsPhys }}</td>
+                        <td>{{ vaisseau.chanceCCdegatsSpe }}</td>
+                    </tr>
+                {% else %}
+                    Aucun vaisseau dans la collection
                 {% endfor %}
             </tbody>
         </table>

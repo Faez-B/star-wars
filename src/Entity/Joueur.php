@@ -42,7 +42,7 @@ class Joueur
     #[ORM\OneToMany(mappedBy: 'joueur', targetEntity: Heros::class)]
     private Collection $heros;
 
-    #[ORM\OneToMany(mappedBy: 'joueur', targetEntity: Vaisseau::class)]
+    #[ORM\OneToMany(mappedBy: 'joueur', targetEntity: Vaisseau::class, cascade: ['persist'])]
     private Collection $vaisseaux;
 
     public function __construct()
