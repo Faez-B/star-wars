@@ -43,7 +43,7 @@ class ApiController extends AbstractController
     }
 
     #[Route('/{allyCode}/create', name: 'create_player')]
-    public function createPlayer(int $allyCode): Response
+    public function createPlayer(int $allyCode, HerosService $herosService): Response
     {
         // ----- LE JOUEUR -----
 
@@ -55,6 +55,7 @@ class ApiController extends AbstractController
         $client = HttpClient::create();
         $response = $client->request('GET', 'https://swgoh.gg/api/player/' . $allyCode);
         $data = ($response->toArray())['data'];
+        $characters = ($response->toArray())['units'];
 
         $joueur = new Joueur();
         $joueur->setAllyCode($allyCode);
@@ -68,6 +69,8 @@ class ApiController extends AbstractController
         $this->em->persist($joueur);
         $this->em->flush();
 
+        // La collection de héros du joueur
+        $herosService->addHeros($joueur, $characters);
 
         // ----- LA GUILDE -----
 
@@ -92,6 +95,8 @@ class ApiController extends AbstractController
 
 
         // ----- LES JOUEURS de la guilde -----
+        $otherMembersAllyCode = [];
+
         foreach ($data["members"] as $member) {
             $allyCode = $member["ally_code"];
 
@@ -114,97 +119,24 @@ class ApiController extends AbstractController
                 $guilde->addJoueur($joueur);
                 $this->em->persist($joueur);
                 $this->em->persist($guilde);
+
+                $otherMembersAllyCode[] = $allyCode;
             }
         }
 
         $this->em->flush();
+        $this->em->clear();
+
+        // ----- LES HÉROS des joueurs de la guilde -----
+        foreach ($otherMembersAllyCode as $allyCode) {
+            $response = $client->request('GET', 'https://swgoh.gg/api/player/' . $allyCode);
+            $characters = ($response->toArray())['units'];
+
+            $joueur = $this->em->getRepository(Joueur::class)->findOneBy(['allyCode' => $allyCode]);
+            $herosService->addHeros($joueur, $characters);
+            $this->em->clear();
+        }
 
         return new Response('Le joueur, sa guilde et les joueurs de la guilde sont créés', Response::HTTP_OK);
-    }
-
-    #[Route('/createHeros', name: 'create_heros', methods: ['GET'])]
-    public function createHeros(HerosService $herosService): Response
-    {
-        $client = HttpClient::create();
-        $response = $client->request('GET', 'https://swgoh.gg/api/characters/');
-        $data = $response->toArray();
-
-        $joueurs = $this->em->getRepository(Joueur::class)->findAll();
-
-        foreach ($joueurs as $joueur) {
-            
-            // Vérifier chaque héros (API) pour chaque joueur (BDD)
-            foreach ($data as $character) {
-                $path = parse_url($character['url'], PHP_URL_PATH);
-                $characterSlug = basename($path);
-                
-                $characterURL = "https://swgoh.gg/p/" . $joueur->getAllyCode() . "/characters/" . $characterSlug;
-
-                $response = $client->request('GET', $characterURL);
-                
-                // On vérifie si le héros est dans la collection du joueur => (status code == 200)
-                if ($response->getStatusCode() === 200) {
-                    
-                    $content = $response->getContent();
-                    $crawler = new Crawler($content);
-
-                    $nom            = $crawler->filter('a.pc-char-overview-name')->text();
-                    $vie            = trim($herosService->getText($crawler, 'Health'));
-                    $puissance      = $crawler->filter('.media-body span.pc-stat-value')->text();
-                    $vitesse        = $herosService->getText($crawler, 'Speed');
-                    $protection     = $herosService->getText($crawler, 'Protection');
-                    $tenacite       = $herosService->getText($crawler, 'Tenacity');
-                    $degatsPhys     = $herosService->getText($crawler, 'Physical Damage');
-                    $degatsSpe      = $herosService->getText($crawler, 'Special Damage');
-                    $chanceCCPhys   = $herosService->getText($crawler, 'Physical Critical Chance');
-                    $chanceCCSpe    = $herosService->getText($crawler, 'Special Critical Chance');
-                    $degatsCrit     = $herosService->getText($crawler, 'Critical Damage');
-                    $volVie         = $herosService->getText($crawler, 'Health Steal');
-
-                    // Supprime le % de la chaîne
-                    $tenacite       = $herosService->removePercentageInStat($tenacite);
-                    $chanceCCPhys   = $herosService->removePercentageInStat($chanceCCPhys);
-                    $chanceCCSpe    = $herosService->removePercentageInStat($chanceCCSpe);
-                    $degatsCrit     = $herosService->removePercentageInStat($degatsCrit);
-                    $volVie         = $herosService->removePercentageInStat($volVie);
-
-                    // Transforme la chaîne en float
-                    $vie            = $herosService->convertStringToFloat($vie);
-                    $protection     = $herosService->convertStringToFloat($protection);
-                    $degatsPhys     = $herosService->convertStringToFloat($degatsPhys);
-                    $degatsSpe      = $herosService->convertStringToFloat($degatsSpe);
-                    $tenacite       = $herosService->convertStringToFloat($tenacite);
-                    $chanceCCPhys   = $herosService->convertStringToFloat($chanceCCPhys);
-                    $chanceCCSpe    = $herosService->convertStringToFloat($chanceCCSpe);
-                    $degatsCrit     = $herosService->convertStringToFloat($degatsCrit);
-                    $volVie         = $herosService->convertStringToFloat($volVie);
-
-
-                    $heros = new Heros();
-                    $heros->setBaseID($character['base_id']);
-                    $heros->setNom($nom);
-                    $heros->setVie($vie);
-                    $heros->setPuissance($puissance);
-                    $heros->setVitesse($vitesse);
-                    $heros->setProtection($protection);
-                    $heros->setTenacite($tenacite);
-                    $heros->setDegatsPhysiques($degatsPhys);
-                    $heros->setDegatSpeciaux($degatsSpe);
-                    $heros->setChanceCCdegatsPhys($chanceCCPhys);
-                    $heros->setChanceCCdegatsSpe($chanceCCSpe);
-                    $heros->setDegatCritique($degatsCrit);
-                    $heros->setVolVie($volVie);
-
-                    $joueur->addHero($heros);
-
-                    $this->em->persist($heros);
-                    $this->em->persist($joueur);
-                }
-            }
-        }
-
-        $this->em->flush();
-            
-        return new Response('Les héros sont créés', Response::HTTP_OK);
     }
 }
