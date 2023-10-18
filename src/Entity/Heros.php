@@ -19,8 +19,8 @@ class Heros
     #[ORM\Column(length: 255)]
     private ?string $baseID = null;
 
-    #[ORM\Column(length: 255)]
-    private ?string $vie = null;
+    #[ORM\Column]
+    private ?float $vie = null;
 
     #[ORM\Column]
     private ?float $protection = null;
@@ -52,6 +52,9 @@ class Heros
     #[ORM\ManyToOne(inversedBy: 'heros')]
     private ?Joueur $joueur = null;
 
+    #[ORM\Column]
+    private ?int $vitesse = null;
+
     public function getId(): ?int
     {
         return $this->id;
@@ -81,12 +84,12 @@ class Heros
         return $this;
     }
 
-    public function getVie(): ?string
+    public function getVie(): ?float
     {
         return $this->vie;
     }
 
-    public function setVie(string $vie): static
+    public function setVie(float $vie): static
     {
         $this->vie = $vie;
 
@@ -209,6 +212,18 @@ class Heros
     public function setJoueur(?Joueur $joueur): static
     {
         $this->joueur = $joueur;
+
+        return $this;
+    }
+
+    public function getVitesse(): ?int
+    {
+        return $this->vitesse;
+    }
+
+    public function setVitesse(int $vitesse): static
+    {
+        $this->vitesse = $vitesse;
 
         return $this;
     }
