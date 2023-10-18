@@ -14,6 +14,9 @@ use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 
+// Pour l'ajout de héros des joueurs de la guilde
+ini_set('memory_limit', '512M');
+
 #[Route('/api')]
 class ApiController extends AbstractController
 {
@@ -127,6 +130,7 @@ class ApiController extends AbstractController
         $this->em->flush();
         $this->em->clear();
 
+        // Si on n'augmente pas la mémoire -> Error : Memory limit
         // ----- LES HÉROS des joueurs de la guilde -----
         foreach ($otherMembersAllyCode as $allyCode) {
             $response = $client->request('GET', 'https://swgoh.gg/api/player/' . $allyCode);
