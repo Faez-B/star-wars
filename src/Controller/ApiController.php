@@ -2,14 +2,20 @@
 
 namespace App\Controller;
 
+use App\Entity\Heros;
 use App\Entity\Guilde;
 use App\Entity\Joueur;
+use App\Service\HerosService;
 use Doctrine\ORM\EntityManagerInterface;
+use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpClient\HttpClient;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Annotation\Route;
 use Symfony\Component\HttpFoundation\JsonResponse;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
+
+// Pour l'ajout de héros des joueurs de la guilde
+ini_set('memory_limit', '512M');
 
 #[Route('/api')]
 class ApiController extends AbstractController
@@ -40,7 +46,7 @@ class ApiController extends AbstractController
     }
 
     #[Route('/{allyCode}/create', name: 'create_player')]
-    public function createPlayer(int $allyCode): Response
+    public function createPlayer(int $allyCode, HerosService $herosService): Response
     {
         // ----- LE JOUEUR -----
 
@@ -52,6 +58,7 @@ class ApiController extends AbstractController
         $client = HttpClient::create();
         $response = $client->request('GET', 'https://swgoh.gg/api/player/' . $allyCode);
         $data = ($response->toArray())['data'];
+        $characters = ($response->toArray())['units'];
 
         $joueur = new Joueur();
         $joueur->setAllyCode($allyCode);
@@ -65,6 +72,8 @@ class ApiController extends AbstractController
         $this->em->persist($joueur);
         $this->em->flush();
 
+        // La collection de héros du joueur
+        $herosService->addHeros($joueur, $characters);
 
         // ----- LA GUILDE -----
 
@@ -89,6 +98,8 @@ class ApiController extends AbstractController
 
 
         // ----- LES JOUEURS de la guilde -----
+        $otherMembersAllyCode = [];
+
         foreach ($data["members"] as $member) {
             $allyCode = $member["ally_code"];
 
@@ -111,10 +122,24 @@ class ApiController extends AbstractController
                 $guilde->addJoueur($joueur);
                 $this->em->persist($joueur);
                 $this->em->persist($guilde);
+
+                $otherMembersAllyCode[] = $allyCode;
             }
         }
 
         $this->em->flush();
+        $this->em->clear();
+
+        // Si on n'augmente pas la mémoire -> Error : Memory limit
+        // ----- LES HÉROS des joueurs de la guilde -----
+        foreach ($otherMembersAllyCode as $allyCode) {
+            $response = $client->request('GET', 'https://swgoh.gg/api/player/' . $allyCode);
+            $characters = ($response->toArray())['units'];
+
+            $joueur = $this->em->getRepository(Joueur::class)->findOneBy(['allyCode' => $allyCode]);
+            $herosService->addHeros($joueur, $characters);
+            $this->em->clear();
+        }
 
         return new Response('Le joueur, sa guilde et les joueurs de la guilde sont créés', Response::HTTP_OK);
     }

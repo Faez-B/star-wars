@@ -3,6 +3,8 @@
 namespace App\Entity;
 
 use App\Repository\JoueurRepository;
+use Doctrine\Common\Collections\ArrayCollection;
+use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
 
 #[ORM\Entity(repositoryClass: JoueurRepository::class)]
@@ -36,6 +38,18 @@ class Joueur
 
     #[ORM\ManyToOne(inversedBy: 'joueurs')]
     private ?Guilde $guilde = null;
+
+    #[ORM\OneToMany(mappedBy: 'joueur', targetEntity: Heros::class)]
+    private Collection $heros;
+
+    #[ORM\OneToMany(mappedBy: 'joueur', targetEntity: Vaisseau::class)]
+    private Collection $vaisseaux;
+
+    public function __construct()
+    {
+        $this->heros = new ArrayCollection();
+        $this->vaisseaux = new ArrayCollection();
+    }
 
     public function getId(): ?int
     {
@@ -134,6 +148,66 @@ class Joueur
     public function setGuilde(?Guilde $guilde): static
     {
         $this->guilde = $guilde;
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Heros>
+     */
+    public function getHeros(): Collection
+    {
+        return $this->heros;
+    }
+
+    public function addHero(Heros $hero): static
+    {
+        if (!$this->heros->contains($hero)) {
+            $this->heros->add($hero);
+            $hero->setJoueur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeHero(Heros $hero): static
+    {
+        if ($this->heros->removeElement($hero)) {
+            // set the owning side to null (unless already changed)
+            if ($hero->getJoueur() === $this) {
+                $hero->setJoueur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Vaisseau>
+     */
+    public function getVaisseaux(): Collection
+    {
+        return $this->vaisseaux;
+    }
+
+    public function addVaisseau(Vaisseau $vaisseau): static
+    {
+        if (!$this->vaisseaux->contains($vaisseau)) {
+            $this->vaisseaux->add($vaisseau);
+            $vaisseau->setJoueur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVaisseau(Vaisseau $vaisseau): static
+    {
+        if ($this->vaisseaux->removeElement($vaisseau)) {
+            // set the owning side to null (unless already changed)
+            if ($vaisseau->getJoueur() === $this) {
+                $vaisseau->setJoueur(null);
+            }
+        }
 
         return $this;
     }
