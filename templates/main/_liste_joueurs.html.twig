@@ -1,0 +1,20 @@
+{% for joueur in joueurs %}
+    <tr>
+        <td>{{ joueur.allyCode }}</td>
+        <td>{{ joueur.pseudo }}</td>
+        <td>{{ joueur.titre }}</td>
+        <td align="center">{{ joueur.niveau }}</td>
+        <td align="center">{{ joueur.puisGalactiqueTotale }}</td>
+        <td align="center">{{ joueur.puisGalactiqueHeros }}</td>
+        <td align="center">{{ joueur.puisGalactiqueVaisseaux }}</td>
+        <td align="center">
+            <a href="{{ path('see_player', {id : joueur.id}) }}" class="btn btn-primary">
+                Voir
+            </a>
+        </td>
+    </tr>
+{% else %}
+    <tr>
+        <td colspan="7">Aucun joueur trouvé</td>
+    </tr>
+{% endfor %}

@@ -30,9 +30,28 @@ Go to the project directory
 Run via Docker
 
 ```bash
-  docker compose up --build
+  docker compose up --build -d
 ```
 
+Create tables
+  
+```bash
+  docker exec -it app bash
+```
+
+```bash
+  php bin/console doctrine:migrations:migrate
+  # or, shorthand...
+  php bin/console d:m:m
+```
+
+<!-- Load fixtures
+
+```bash
+  php bin/console doctrine:fixtures:load
+  # or, shorthand...
+  php bin/console d:f:l
+``` -->
 
 <!-- ## Environment Variables
 

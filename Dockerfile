@@ -2,26 +2,25 @@
 FROM composer:latest as composer
 WORKDIR /app
 COPY . ./
-RUN composer install
+RUN composer install --no-scripts --optimize-autoloader
 
 # 2 - Utiliser l'image Node pour installer les dépendances JS
 FROM node:latest as node
 WORKDIR /app
 COPY --from=composer /app ./
-RUN npm install
-RUN npm run build
+RUN npm install \
+    && npm run build
 
 # 3 - Exécuter l'application
 FROM php:8.2.4-apache
 WORKDIR /var/www
-COPY --from=composer /app/vendor /var/www/vendor
-COPY --from=node /app/node_modules /app/node_modules
-COPY . /var/www
+COPY --from=node /app ./
 
 ## Installation des extensions PHP
 ADD https://github.com/mlocati/docker-php-extension-installer/releases/latest/download/install-php-extensions /usr/local/bin/
 RUN chmod +x /usr/local/bin/install-php-extensions && \
-    install-php-extensions gd xdebug pdo pdo_mysql intl zip
+    install-php-extensions pdo pdo_mysql
+    # gd xdebug opcache
 
 ## Création du dossier /var
 RUN php bin/console cache:clear
