@@ -42,9 +42,13 @@ class Joueur
     #[ORM\OneToMany(mappedBy: 'joueur', targetEntity: Heros::class)]
     private Collection $heros;
 
+    #[ORM\OneToMany(mappedBy: 'joueur', targetEntity: Vaisseau::class)]
+    private Collection $vaisseaux;
+
     public function __construct()
     {
         $this->heros = new ArrayCollection();
+        $this->vaisseaux = new ArrayCollection();
     }
 
     public function getId(): ?int
@@ -172,6 +176,36 @@ class Joueur
             // set the owning side to null (unless already changed)
             if ($hero->getJoueur() === $this) {
                 $hero->setJoueur(null);
+            }
+        }
+
+        return $this;
+    }
+
+    /**
+     * @return Collection<int, Vaisseau>
+     */
+    public function getVaisseaux(): Collection
+    {
+        return $this->vaisseaux;
+    }
+
+    public function addVaisseau(Vaisseau $vaisseau): static
+    {
+        if (!$this->vaisseaux->contains($vaisseau)) {
+            $this->vaisseaux->add($vaisseau);
+            $vaisseau->setJoueur($this);
+        }
+
+        return $this;
+    }
+
+    public function removeVaisseau(Vaisseau $vaisseau): static
+    {
+        if ($this->vaisseaux->removeElement($vaisseau)) {
+            // set the owning side to null (unless already changed)
+            if ($vaisseau->getJoueur() === $this) {
+                $vaisseau->setJoueur(null);
             }
         }
 

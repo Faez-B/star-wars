@@ -12,12 +12,12 @@ class Heros
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
+    
+    #[ORM\Column(length: 255)]
+    private ?string $baseID = null;
 
     #[ORM\Column(length: 255)]
     private ?string $nom = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $baseID = null;
 
     #[ORM\Column]
     private ?float $vie = null;
@@ -27,6 +27,9 @@ class Heros
 
     #[ORM\Column]
     private ?int $puissance = null;
+
+    #[ORM\Column]
+    private ?int $vitesse = null;
 
     #[ORM\Column]
     private ?float $tenacite = null;
@@ -51,9 +54,6 @@ class Heros
 
     #[ORM\ManyToOne(inversedBy: 'heros')]
     private ?Joueur $joueur = null;
-
-    #[ORM\Column]
-    private ?int $vitesse = null;
 
     public function getId(): ?int
     {

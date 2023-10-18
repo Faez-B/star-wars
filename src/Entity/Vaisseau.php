@@ -29,6 +29,9 @@ class Vaisseau
     private ?int $puissance = null;
 
     #[ORM\Column]
+    private ?int $vitesse = null;
+
+    #[ORM\Column]
     private ?float $tenacite = null;
 
     #[ORM\Column]
@@ -42,6 +45,9 @@ class Vaisseau
 
     #[ORM\Column]
     private ?float $chanceCCdegatsSpe = null;
+
+    #[ORM\ManyToOne(inversedBy: 'vaisseaux')]
+    private ?Joueur $joueur = null;
 
     public function getId(): ?int
     {
@@ -164,6 +170,30 @@ class Vaisseau
     public function setChanceCCdegatsSpe(float $chanceCCdegatsSpe): static
     {
         $this->chanceCCdegatsSpe = $chanceCCdegatsSpe;
+
+        return $this;
+    }
+
+    public function getVitesse(): ?int
+    {
+        return $this->vitesse;
+    }
+
+    public function setVitesse(int $vitesse): static
+    {
+        $this->vitesse = $vitesse;
+
+        return $this;
+    }
+
+    public function getJoueur(): ?Joueur
+    {
+        return $this->joueur;
+    }
+
+    public function setJoueur(?Joueur $joueur): static
+    {
+        $this->joueur = $joueur;
 
         return $this;
     }
