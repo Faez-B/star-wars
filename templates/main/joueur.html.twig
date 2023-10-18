@@ -4,7 +4,7 @@
 
 {% block body %}
 <div class="">
-    <h1 class="text-center">Détails du joueur</h1>
+    <h1 class="h1 text-center">Détails du joueur</h1>
 
     <table class="table">
         <tbody>
@@ -44,5 +44,56 @@
             </tr>
         </tbody>
     </table>
+
+    <h2 class="h2">Ses héros</h2>
+
+    <div class="table-responsive">
+        <table id="joueur-heros-table" class="table" 
+            data-toggle="table" 
+            data-pagination="true" 
+            data-search="true" 
+            data-page-size="15"
+            {# data-page-list="[15, 30, 50, 100, 200]" #}
+        >
+            <thead>
+                <th>ID</th>
+                <th data-sortable="true" data-searchable="true">Nom</th>
+                <th data-searchable="false">Vie</th>
+                <th data-searchable="false">Protection</th>
+                <th data-sortable="true" data-searchable="false">Puissance</th>
+                <th data-searchable="false">Vitesse</th>
+                <th data-searchable="false">Ténacité</th>
+                <th data-searchable="false">Dégâts physiques</th>
+                <th data-searchable="false">Dégâts spéciaux</th>
+                <th data-searchable="false">Chance coup critique dégâts physiques</th>
+                <th data-searchable="false">Chance coup critique dégâts spéciaux</th>
+                <th data-searchable="false">Dégâts critiques</th>
+                <th data-searchable="false">Vol de vie</th>
+            </thead>
+
+            <tbody>
+                {% for heros in joueur.heros %}
+                    <tr>
+                        <td>{{ heros.baseID }}</td>
+                        <td>{{ heros.nom }}</td>
+                        <td>{{ heros.vie }}</td>
+                        <td>{{ heros.protection }}</td>
+                        <td>{{ heros.puissance }}</td>
+                        <td>{{ heros.vitesse }}</td>
+                        <td>{{ heros.tenacite }}</td>
+                        <td>{{ heros.degatsPhysiques }}</td>
+                        <td>{{ heros.degatSpeciaux }}</td>
+                        <td>{{ heros.chanceCCdegatsPhys }}</td>
+                        <td>{{ heros.chanceCCdegatsSpe }}</td>
+                        <td>{{ heros.degatCritique }}</td>
+                        <td>{{ heros.volVie }}</td>
+                    </tr>
+                {% else %}
+                    Aucun héros dans la collection
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+
 </div>
 {% endblock %}
