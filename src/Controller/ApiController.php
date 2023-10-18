@@ -5,7 +5,9 @@ namespace App\Controller;
 use App\Entity\Heros;
 use App\Entity\Guilde;
 use App\Entity\Joueur;
+use App\Entity\Vaisseau;
 use App\Service\HerosService;
+use App\Service\VaisseauService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\DomCrawler\Crawler;
 use Symfony\Component\HttpClient\HttpClient;
@@ -142,5 +144,86 @@ class ApiController extends AbstractController
         }
 
         return new Response('Le joueur, sa guilde et les joueurs de la guilde sont créés', Response::HTTP_OK);
+    }
+
+    #[Route('/{allyCode}/createShips', name: 'create_ships', methods: ['GET'])]
+    public function createShips(int $allyCode, VaisseauService $service): Response
+    {
+        // Vérifier si le joueur existe
+        $joueur = $this->em->getRepository(Joueur::class)->findOneBy(['allyCode' => $allyCode]);
+
+        if (!$joueur) return new Response('Le joueur n\'existe pas', Response::HTTP_OK);
+
+        // Vérifier si les vaisseaux du joueur existent déjà
+        if (count($joueur->getVaisseaux()) > 0) return new Response('Les vaisseaux existent déjà', Response::HTTP_OK);
+
+        $client = HttpClient::create();
+        $response = $client->request('GET', 'https://swgoh.gg/api/ships/');
+        $data = $response->toArray();
+
+        foreach ($data as $ship) {
+            $path = parse_url($ship['url'], PHP_URL_PATH);
+            $shipSlug = basename($path);
+
+            $shipUrlResponse = $client->request('GET', "https://swgoh.gg/p/" . $joueur->getAllyCode() . "/ships/" . $shipSlug);
+            
+            // On vérifie si le héros est dans la collection du joueur => (status code == 200)
+            if ($shipUrlResponse->getStatusCode() === 200) {
+                
+                $content = $shipUrlResponse->getContent();
+                $crawler = new Crawler($content);
+
+                $nom            = $crawler->filter('a.pc-char-overview-name')->text();
+                $vie            = trim($service->getText($crawler, 'Health'));
+                $puissance      = $crawler->filter('.unit-stat-group-stat-value')->first()->text();
+                $vitesse        = $service->getText($crawler, 'Speed');
+                $protection     = $service->getText($crawler, 'Protection');
+                $tenacite       = $service->getText($crawler, 'Tenacity');
+                $degatsPhys     = $service->getText($crawler, 'Physical Damage');
+                $degatsSpe      = $service->getText($crawler, 'Special Damage');
+                $chanceCCPhys   = $service->getText($crawler, 'Physical Critical Chance');
+                $chanceCCSpe    = $service->getText($crawler, 'Special Critical Chance');
+
+                // Supprime le % de la chaîne
+                $tenacite       = $service->removePercentageInStat($tenacite);
+                $chanceCCPhys   = $service->removePercentageInStat($chanceCCPhys);
+                $chanceCCSpe    = $service->removePercentageInStat($chanceCCSpe);
+
+                // Transforme la chaîne en float
+                $vie            = $service->convertStringToFloat($vie);
+                $protection     = $service->convertStringToFloat($protection);
+                $degatsPhys     = $service->convertStringToFloat($degatsPhys);
+                $degatsSpe      = $service->convertStringToFloat($degatsSpe);
+                $tenacite       = $service->convertStringToFloat($tenacite);
+                $chanceCCPhys   = $service->convertStringToFloat($chanceCCPhys);
+                $chanceCCSpe    = $service->convertStringToFloat($chanceCCSpe);
+
+
+                $vaisseau = new Vaisseau();
+                $vaisseau->setBaseID($ship['base_id']);
+                $vaisseau->setNom($nom);
+                $vaisseau->setVie($vie);
+                $vaisseau->setPuissance($puissance);
+                $vaisseau->setVitesse($vitesse);
+                $vaisseau->setProtection($protection);
+                $vaisseau->setTenacite($tenacite);
+                $vaisseau->setDegatsPhysiques($degatsPhys);
+                $vaisseau->setDegatSpeciaux($degatsSpe);
+                $vaisseau->setChanceCCdegatsPhys($chanceCCPhys);
+                $vaisseau->setChanceCCdegatsSpe($chanceCCSpe);
+
+                $joueur->addVaisseau($vaisseau);
+
+                $this->em->persist($vaisseau);
+                $this->em->persist($joueur);
+
+                
+            }
+        }
+        
+        $this->em->flush();
+        $this->addFlash('success', 'Les vaisseaux ont été ajoutés');
+
+        return $this->redirectToRoute('see_player', ['id' => $joueur->getId()]);
     }
 }

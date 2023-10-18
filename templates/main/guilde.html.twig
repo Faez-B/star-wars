@@ -1,0 +1,32 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails du joueur{% endblock %}
+
+{% block body %}
+<div class="">
+    <h1 class="h1 text-center">Détails de la guilde</h1>
+
+    <a href="{{ path('main') }}" class="d-inline-block mb-2">Accueil</a>
+
+    <table class="table">
+        <tbody>
+            <tr>
+                <th>ID</th>
+                <td>{{ guilde.uniqID }}</td>
+            </tr>
+            <tr>
+                <th>Nom</th>
+                <td>{{ guilde.nom }}</td>
+            </tr>
+            <tr>
+                <th>Puissance galactique</th>
+                <td>{{ guilde.puisGalactique }}</td>
+            </tr>
+            <tr>
+                <th>Nombre de joueurs</th>
+                <td>{{ guilde.nombreJoueurs }}</td>
+            </tr>
+        </tbody>
+    </table>
+</div>
+{% endblock %}

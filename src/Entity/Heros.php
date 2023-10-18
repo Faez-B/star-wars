@@ -47,10 +47,10 @@ class Heros
     private ?float $chanceCCdegatsSpe = null;
 
     #[ORM\Column]
-    private ?int $degatCritique = null;
+    private ?float $degatCritique = null;
 
     #[ORM\Column]
-    private ?int $volVie = null;
+    private ?float $volVie = null;
 
     #[ORM\ManyToOne(inversedBy: 'heros')]
     private ?Joueur $joueur = null;
@@ -158,7 +158,7 @@ class Heros
 
     public function getChanceCCdegatsPhys(): ?float
     {
-        return $this->chanceCCdegatsPhys;
+        return round($this->chanceCCdegatsPhys, 2);
     }
 
     public function setChanceCCdegatsPhys(float $chanceCCdegatsPhys): static
@@ -170,7 +170,7 @@ class Heros
 
     public function getChanceCCdegatsSpe(): ?float
     {
-        return $this->chanceCCdegatsSpe;
+        return round($this->chanceCCdegatsSpe, 2);
     }
 
     public function setChanceCCdegatsSpe(float $chanceCCdegatsSpe): static
@@ -180,24 +180,24 @@ class Heros
         return $this;
     }
 
-    public function getDegatCritique(): ?int
+    public function getDegatCritique(): ?float
     {
         return $this->degatCritique;
     }
 
-    public function setDegatCritique(int $degatCritique): static
+    public function setDegatCritique(float $degatCritique): static
     {
         $this->degatCritique = $degatCritique;
 
         return $this;
     }
 
-    public function getVolVie(): ?int
+    public function getVolVie(): ?float
     {
         return $this->volVie;
     }
 
-    public function setVolVie(int $volVie): static
+    public function setVolVie(float $volVie): static
     {
         $this->volVie = $volVie;
 

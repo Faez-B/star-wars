@@ -2,6 +2,7 @@
 
 namespace App\Controller;
 
+use App\Entity\Guilde;
 use App\Entity\Joueur;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Response;
@@ -27,8 +28,22 @@ class MainController extends AbstractController
     #[Route('/joueur/{id}', name: 'see_player')]
     public function seePlayer(Joueur $joueur): Response
     {
+        $addShips = false;
+        if ($joueur->getVaisseaux()->count() === 0) {
+            $addShips = true;
+        }
+
         return $this->render('main/joueur.html.twig', [
             'joueur' => $joueur,
+            'addShips' => $addShips,
+        ]);
+    }
+
+    #[Route('/guilde/{id}', name: 'see_guild')]
+    public function seeGuild(Guilde $guilde): Response
+    {
+        return $this->render('main/guilde.html.twig', [
+            'guilde' => $guilde,
         ]);
     }
 }
