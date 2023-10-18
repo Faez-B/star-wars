@@ -13,6 +13,8 @@
 
     <h1 class="h1 text-center">Détails du joueur</h1>
 
+    <a href="{{ path('main') }}" class="d-inline-block mb-2">Retour</a>
+
     {% if addShips is defined and addShips == true %}
         <a href="{{ path('create_ships', {'allyCode' : joueur.allyCode}) }}" class="btn btn-success">Ajouter ses vaisseaux</a>
     {% endif %}
