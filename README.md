@@ -97,6 +97,18 @@ This route allows, using a player's ally code, to obtain various information reg
 
 This route enables saving a player's and their guild's information in the database.
 
+## Test Data
+
+Some ally codes to fill the database
+
+```bash
+- 246639295
+- 761645438
+- 827176727
+- 827485438
+- 717176645
+```
+
 
 
 
