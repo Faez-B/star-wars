@@ -14,12 +14,6 @@ Encore
     // only needed for CDN's or subdirectory deploy
     //.setManifestKeyPrefix('build/')
     
-    // .autoProvideVariables({
-    //     $: 'jquery',
-    //     jQuery: 'jquery',
-    //     'window.jQuery': 'jquery',
-    // })
-
     /*
      * ENTRY CONFIG
      *
@@ -27,12 +21,6 @@ Encore
      * and one CSS file (e.g. app.css) if your JavaScript imports CSS.
      */
     .addEntry('app', './assets/app.js')
-    // .addStyleEntry('bootstrap-css', './node_modules/bootstrap/dist/css/bootstrap.min.css')
-    // .addStyleEntry('bootstrap-table-css', './node_modules/bootstrap-table/dist/bootstrap-table.min.css')
-    // .addEntry('jquery', './node_modules/jquery/dist/jquery.min.js')
-    // .addEntry('bootstrap-js', './node_modules/bootstrap/dist/js/bootstrap.bundle.min.js')
-    // .addEntry('bootstrap-table-js', './node_modules/bootstrap-table/dist/bootstrap-table.min.js')
-    
 
 
     // When enabled, Webpack "splits" your files into smaller pieces for greater optimization.
@@ -80,7 +68,7 @@ Encore
     //.enableIntegrityHashes(Encore.isProduction())
 
     // uncomment if you're having problems with a jQuery plugin
-    //.autoProvidejQuery()
+    .autoProvidejQuery()
 ;
 
 module.exports = Encore.getWebpackConfig();

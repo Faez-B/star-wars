@@ -44,8 +44,8 @@ services:
       - mynetwork
     # Utile pour le dev (modifications envoyées dans le container) 
     # mais il faut également exécuter les commandes d'instalation (composer install, npm install, npm run build)
-    volumes:
-      - ./:/var/www
+    # volumes:
+    #   - ./:/var/www
 
 volumes:
 ###> doctrine/doctrine-bundle ###
