@@ -5,11 +5,10 @@ COPY . ./
 RUN composer install --no-scripts --optimize-autoloader
 
 # 2 - Utiliser l'image Node pour installer les dépendances JS
-FROM node:latest as node
+FROM node:20.8.1 as node
 WORKDIR /app
 COPY --from=composer /app ./
-RUN npm install \
-    && npm run build
+RUN npm install && npm run build
 
 # 3 - Exécuter l'application
 FROM php:8.2.4-apache
