@@ -7,3 +7,8 @@
 
 // any CSS you import will output into a single css file (app.css in this case)
 import './styles/app.scss';
+
+// To import the JS from node_modules
+import 'bootstrap';
+import 'bootstrap-table/src/bootstrap-table';
+import 'bootstrap-table/src/locale/bootstrap-table-fr-FR';
